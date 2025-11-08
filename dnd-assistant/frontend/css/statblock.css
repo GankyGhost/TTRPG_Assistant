@@ -1,0 +1,54 @@
+.statblock {
+    height: 50px;
+    margin-left: 350px;
+    margin-top: 40px;
+    width: 50rem;
+}
+.char_img{
+    padding-top: 2rem;
+    text-align: center;
+}
+
+.statblock-card{
+    background-image: radial-gradient(circle, #f8f2d6 65%, #a77c43);
+}
+
+.char_detz{
+    padding: 2rem;
+}
+
+.Name{
+    font-family: "Grenze Gotisch", serif;
+    font-size: 5rem;
+    font-style: normal;
+    color: #7a0000;
+}
+
+.species{
+    font-family: "Atkinson Hyperlegible Mono", sans-serif;
+    font-optical-sizing: auto;
+    font-style: italic;
+}
+
+hr {
+    color: #372b16;
+}
+
+.container {
+    display: grid;
+    grid-template-columns: auto auto auto;
+    font-family: "Atkinson Hyperlegible Mono", sans-serif;
+}
+.container div {
+    font-size: 20px;
+    text-align: center;
+}
+
+p{
+    font-family: "Atkinson Hyperlegible Mono", sans-serif;
+    font-optical-sizing: auto;
+}
+
+h5{
+    font-family: "Atkinson Hyperlegible Mono", sans-serif;
+}
