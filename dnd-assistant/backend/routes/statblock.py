@@ -12,15 +12,17 @@ def create_statblock(statblock: dict):
     result = collection.insert_one(statblock)
     return {"inserted_id": str(result.inserted_id)}
 
+@app.get("/modifier")
 def ability_modifier(score) -> int:
    
     if not isinstance(score, int):
-        raise TypeError("Score must be an integer.")
+        raise TypeError("Score must be an integer")
     if score < 1 or score > 30:
-        raise ValueError("Score must be between 1 and 30.")
+        raise ValueError("Score must be between 1 and 30")
     
     return ((score - 10) // 2)
-    
+
+
     
 """""if __name__ == "__main__":
 
