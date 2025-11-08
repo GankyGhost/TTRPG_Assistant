@@ -31,4 +31,4 @@ app.include_router(statblocks.router, prefix="/api/statblocks")
 def root():
     return {"message": "D&D Assistant API"}
 
-# Run with: uvicorn main:app --reload
+# Run with: cd backend, followed by uvicorn main:app --reload
