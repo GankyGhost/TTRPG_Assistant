@@ -1,42 +1,37 @@
-"""Barbie: I'm adding routes to Emilia's code so I can access and connect it to the frontend, 
-I'll do my best to keep most of the functionalities as she intended"""
+"""Barbie: I modified it to better fit our requirements, but same logic"""
 from fastapi import APIRouter
-# import the random library 
+from pydantic import BaseModel, Field 
 import random
 
-router = APIRouter
+router = APIRouter()
 
-#simplified dice function
-def roll_dice(sides, count = 1, modifier=0):
+#Pydantic model for the request body (the instant form data)
+class DiceRollRequest(BaseModel):
+    # Default to 1 roll and 0 modifier as defined in the helper function
+    count: int = Field(1, description="The number of dice to roll (N). Must be 1 or greater.")
+    modifier: int = Field(0, description="The integer modifier to add to the total roll (M).")
+
+#helper function for parameter
+def roll_dice(sides: int, count: int = 1, modifier: int = 0):
+    # Ensure count is at least 1
+    count = max(1, count)
+    
     rolls = [random.randint(1, sides) for _ in range(count)]
-    return sum(rolls) + modifier
+    total = sum(rolls) + modifier
+    
+    return {
+        "sides": sides,
+        "count": count,
+        "modifier": modifier,
+        "rolls": rolls,
+        "total": total
+    }
 
-# create dice functions to use for rolling dice;
-# d4, d6, d8, d10, d12, d20, and percentile dice --- d100, in this case.
-@router.get("/roll/d4")
-def d4(): 
-    return {"result" + roll_dice(4)}
+@router.post("/roll/d{sides}")
+def roll_custom_dice(sides: int, request: DiceRollRequest):
+    #error handling
+    if sides < 2:
+        return {"error": "Dice must have at least 2 sides."}, 400
 
-@router.get("/roll/d6")
-def d6():
-    return {"result" + roll_dice(6)}
-
-@router.get("/roll/d8")
-def d8():
-    return {"result" + roll_dice(8)}
-
-@router.get("/roll/d10")
-def d10():
-    return {"result" + roll_dice(10)}
-
-@router.get("/roll/d12")
-def d12():
-    return {"result" + roll_dice(12)}
-
-@router.get("/roll/d20")
-def d20():
-    return {"result" + roll_dice(20)}
-
-@router.get("/roll/d100")
-def d100():
-    return {"result" + roll_dice(100)}
+    result = roll_dice(sides, request.count, request.modifier)
+    return result
