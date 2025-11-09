@@ -19,14 +19,67 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Mono:ital,wght@0,200..800;1,200..800&family=Grenze+Gotisch:wght@100..900&display=swap"
           rel="stylesheet">
+    
+    <!-- Modal 1: Menu - View or Create -->
+    <div id="statblock-menu-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span class="close" onclick="closeStatblockMenu()">&times;</span>
+            <h2>Stat Block Manager</h2>
+            <button class="modal-btn" onclick="showStatblockList()">View Saved Stat Blocks</button>
+            <button class="modal-btn" onclick="showStatblockForm()">Create New Stat Block</button>
+        </div>
+    </div>
+
+    <!-- Modal 2: List of Saved Stat Blocks -->
+    <div id="statblock-list-modal" class="modal" style="display: none;">
+        <div class="modal-content modal-large">
+            <span class="close" onclick="closeStatblockList()">&times;</span>
+            <h2>Saved Stat Blocks</h2>
+            <div id="statblock-list-container">
+                <!-- Stat blocks will be dynamically loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 3: Stat Block Detail View -->
+    <div id="statblock-detail-modal" class="modal" style="display: none;">
+        <div class="modal-content modal-xlarge">
+            <span class="close" onclick="closeStatblockDetail()">&times;</span>
+            <div id="statblock-detail-content">
+                <!-- Full stat block will be displayed here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 4: Create Stat Block Form -->
+    <div id="statblock-form-modal" class="modal" style="display: none;">
+        <div class="modal-content modal-xlarge">
+            <span class="close" onclick="closeStatblockForm()">&times;</span>
+            <div id="form-container">
+                <!-- Form will be loaded here -->
+            </div>
+        </div>
+    </div>
 
     <!--    jQuery-->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+    <script src="/js/statblock.js"></script>
 </head>
 <body>
+    <h1>DnD Assistant</h1>
     <div class="content">
-        <img src="/img/stat icon.png">
-        <img src="/img/audio icon.png">
+        <div class="statblock">
+            <button class="file-button" onclick="openStatblockMenu()"> 
+                <img src="/img/stat icon.png" alt="Statblock Manager">
+            </button>
+        </div>
+
+        <div class="audio">
+            <button class="file-button" onclick="openAudioModal()"> 
+                <img src="/img/audio icon.png" alt="Audio Manager">
+            </button>
+        </div>
     </div>
     <div class="container">
         <img src="/img/table.png" class="table-bg-image" alt="Dice Rolling Table">

@@ -5,9 +5,9 @@ from fastapi.responses import HTMLResponse
 from pymongo import MongoClient
 import os
 
-from .routes import dice
+from .routes import dice, statblock
 # Importing routes
- #notes, audio, statblock
+ #notes, audio
 
 
 app = FastAPI()
@@ -28,7 +28,7 @@ db = client['dnd_assistant']
 # app.include_router(audio.router, prefix="/api/audio")
 app.include_router(dice.router, prefix="/api/dice")
 # app.include_router(notes.router, prefix="/api/notes")
-# app.include_router(statblock.router, prefix="/api/statblocks")
+app.include_router(statblock.router, prefix="/api/statblock")
 
 app.mount("/css", StaticFiles(directory="frontend/css"), name="css")
 app.mount("/js", StaticFiles(directory="frontend/js"), name="js")

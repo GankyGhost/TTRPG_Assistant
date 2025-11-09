@@ -2,9 +2,37 @@ body {
     background-image: linear-gradient(to bottom, #990000, #330000); 
 }
 
+h1{
+    font-family: "Grenze Gotisch", serif;
+    font-size: 5rem;
+    font-style: normal;
+    color: white;
+    text-align: center;
+}
+
+
+.content {
+    text-align: center;
+    display: flex; 
+    justify-content: center;
+
+}
+
+.content .file-button {
+    cursor: pointer;
+    background: transparent; 
+    border: none;
+}
+
+.content .file-button img {
+    height: 125px;
+    width: auto;
+    position: static; 
+}
+
 .container {
     text-align: center;
-    padding-top: 5rem;
+    padding-top: 11rem;
 
     position: relative; 
     display: inline-block; 
@@ -12,7 +40,6 @@ body {
 
 .container .table-bg-image {
     height: 450px;
-    
 }
 
 .container .dice {
@@ -136,6 +163,119 @@ body {
     cursor: pointer;
     opacity: 0.7;
     transition: opacity 0.2s;
+}
+
+
+/* Modal Background */
+.modal {
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    overflow: auto;
+}
+
+/* Modal Content Box */
+/* .modal-content {
+    background-color: #fefefe;
+    margin: 5% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    border-radius: 10px;
+    width: 50%;
+    max-width: 600px;
+    position: relative;
+} */
+
+/* Large Modal for Stat Blocks List */
+.modal-large {
+    width: 70%;
+    max-width: 800px;
+    max-height: 85vh;
+    overflow-y: auto;
+}
+
+/* Extra Large Modal for Detail/Form */
+.modal-xlarge {
+    width: 85%;
+    max-width: 1000px;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+/* Close Button */
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.close:hover,
+.close:focus {
+    color: #000;
+}
+
+/* Modal Buttons */
+.modal-btn {
+    display: block;
+    width: 100%;
+    padding: 15px;
+    margin: 10px 0;
+    background-color: #7a0000;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 1.2rem;
+    cursor: pointer;
+    font-family: "Atkinson Hyperlegible Mono", sans-serif;
+}
+
+.modal-btn:hover {
+    background-color: #5a0000;
+}
+
+/* Stat Block List Items */
+.statblock-list-item {
+    padding: 15px;
+    margin: 10px 0;
+    background-color: #f8f2d6;
+    border: 2px solid #a77c43;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.statblock-list-item:hover {
+    background-color: #efe8c8;
+    transform: translateX(5px);
+}
+
+.statblock-list-item h3 {
+    margin: 0;
+    color: #7a0000;
+    font-family: "Grenze Gotisch", serif;
+}
+
+.statblock-list-item p {
+    margin: 5px 0 0 0;
+    font-family: "Atkinson Hyperlegible Mono", sans-serif;
+    font-size: 0.9rem;
+}
+
+/* Make stat block fit in modal */
+.modal .statblock {
+    padding: 20px;
+    margin: 0;
+    width: 100%;
+}
+
+.modal .statblock-card {
+    height: auto;
 }
 
 .modal-content h2 {

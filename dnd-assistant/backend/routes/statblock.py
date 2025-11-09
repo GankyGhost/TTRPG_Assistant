@@ -1,12 +1,32 @@
-# imports fastapi and pymongo
 from fastapi import APIRouter
+from pydantic import BaseModel, Field
 import pymongo
+from bson.objectid import ObjectId
 import base64
+from typing import List, Optional
 
 router = APIRouter()
+
 client = pymongo.MongoClient("mongodb+srv://mrnagrat_db_user:blueFUHSHUHd00d@dndatabase.hduyis6.mongodb.net/""?retryWrites=true&w=majority&tls=true")
 db = client["dndatabase"]
 collection = db["statblocks"]
+
+class StatblockData(BaseModel):
+    name: str
+    size: str
+    creature_type: str = Field(default="Beast")
+    ac: int
+    hp: int
+    speed: str
+    abilities: dict # e.g., {"STR": 10, "DEX": 10, ...}
+    skills: List[str] # e.g., ["Athletics", "Stealth"]
+    senses: List[str] = Field(default_factory=list)
+    languages: List[str] = Field(default_factory=list)
+    cr: int = Field(alias="challenge_rating") # Maps the frontend 'challenge_rating' field to 'cr' in Python
+    traits: List[str] = Field(default_factory=list)
+    actions: List[str]
+    image_path: Optional[str] = None # Expecting a path or URL for image
+
 
 # helper function that stores the statblock dictionary into MongoDB
 def store_statblock(statblock: dict):
@@ -16,70 +36,113 @@ def store_statblock(statblock: dict):
 
 # helper function that returns the modifier for any given score between 1-30
 def ability_modifier(score) -> int:
-   
     if not isinstance(score, int):
-        raise TypeError("Score must be an integer")
+        return 0
     if score < 1 or score > 30:
-        raise ValueError("Score must be between 1 and 30")
-    
+        return 0
     return ((score - 10) // 2)
 
 
 # helper function to determine proficient skill bonuses
+
 def determine_bonus(skill:str, abilities:dict):
-    # a dictionary with keys named after each ability with a list containing the respective skills
+    # Dictionary mapping skills to their respective abilities
     skills_by_ability = {
-    "STR": ["Athletics"],
-    "DEX": ["Acrobatics", "Sleight of Hand", "Stealth"],
-    "INT": ["Arcana", "History", "Investigation", "Nature", "Religion"],
-    "WIS": ["Animal Handling", "Insight", "Medicine", "Perception", "Survival"],
-    "CHA": ["Deception", "Intimidation", "Performance", "Persuasion"] }
+        "Athletics": "STR", 
+        "Acrobatics": "DEX", "Sleight of Hand": "DEX", "Stealth": "DEX",
+        "Arcana": "INT", "History": "INT", "Investigation": "INT", "Nature": "INT", "Religion": "INT",
+        "Animal Handling": "WIS", "Insight": "WIS", "Medicine": "WIS", "Perception": "WIS", "Survival": "WIS",
+        "Deception": "CHA", "Intimidation": "CHA", "Performance": "CHA", "Persuasion": "CHA"
+
+    }
 
     # determines which ability is tied to the skill
-    used_ability = ''
-    for ability, skill_list in skills_by_ability.items():
-        if skill in skill_list:
-           used_ability = ability
+    used_ability = skills_by_ability.get(skill.split()[0]) # Gets ability from skill name
     
-    return ability_modifier(abilities[used_ability])
+    if used_ability in abilities:
+        return ability_modifier(abilities[used_ability])
+    return 0
+
 
 # helper function to encode imnage into base64
+# helper function to encode image into base64
 def image_to_base64(path):
-    with open(path, "rb") as image_file:      # read image in binary mode
-        encoded_string = base64.b64encode(image_file.read())  # encode to base64
-        return encoded_string.decode("utf-8") 
+    # NOTE: This relies on the path being available locally on the server.
+    if not path or not os.path.exists(path):
+        return None 
+    try:
+        with open(path, "rb") as image_file:           # read image in binary mode
+            encoded_string = base64.b64encode(image_file.read())   # encode to base64
+            return encoded_string.decode("utf-8") 
+    except Exception as e:
+        print(f"Error encoding image: {e}")
+        return None
+    
 
 
-# helper function to decode image from base64
-def base64_to_image(b64_string, output_path):   # read binary
-    img_data = base64.b64decode(b64_string)  # decode from base64
-    with open(output_path, "wb") as f:
-        f.write(img_data)
+# # helper function to decode image from base64
+# def base64_to_image(b64_string, output_path):   # read binary
+#     img_data = base64.b64decode(b64_string)  # decode from base64
+#     with open(output_path, "wb") as f:
+#         f.write(img_data)
     
+@router.post("/statblock", response_model=dict)
+def create_statblock_api(stats: StatblockData):
+    # Convert Pydantic model to dict for processing
+    stats_dict = stats.model_dump(by_alias=True)
     
-# create statblock based on info from user input
-@router.post("/statblock")
-def create_statblock(stats: dict) -> None:
     # determines the proficency bonus based on creatures CR
-    pb_table = [2, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4,
-    5, 5, 5, 5, 6, 6, 6, 6, 7, 7, 7, 7, 8, 8, 8, 8, 9, 9] # this list is size 31 for each CR level that is possible i.e CR0-4 makes PB = 2
-
-    stats['pb'] = pb_table[stats['cr']]
-
-    # properly formats the strings containing the skills
-    new_skills = [] # empty list that will hold the formatted skills that will replace the orignal skills element
-    for skill in stats['skills']:
-        bns = determine_bonus(skill, stats['abilities'])
-        new_skills.append(f"{skill} +{bns + stats['pb']}")
+    # CR is 0-30, list index needs to be 0-based
+    pb_table = [2, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5, 6, 6, 6, 6, 7, 7, 7, 7, 8, 8, 8, 8, 9, 9] 
     
-    stats['skills'] = new_skills # replacing the orignal skills with new_skills
+    # Ensure CR is within bounds [0, 30]
+    cr_index = min(max(stats_dict['cr'], 0), 30)
+    stats_dict['pb'] = pb_table[cr_index]
 
-    # inputs base64 image
-    stats['image'] = image_to_base64(stats['image_path'])
+    # Process skills and add proficiency bonus (assuming input skills are just names, like 'Stealth')
+    new_skills = [] 
+    for skill in stats_dict['skills']:
+        bns = determine_bonus(skill, stats_dict['abilities'])
+        # Assumes input is just the skill name; result is formatted string
+        new_skills.append(f"{skill} +{bns + stats_dict['pb']}")
+    
+    stats_dict['skills'] = new_skills 
 
-    store_statblock(stats)
+    # inputs base64 image (Only works if stats_dict['image_path'] points to a local file on the server)
+    # Since the frontend only sends text, we'll skip base64 for now unless you provide a simple way to upload files.
+    # stats_dict['image'] = image_to_base64(stats_dict.get('image_path'))
+    stats_dict['image_b64'] = "" # Placeholder
 
-    print("Statblock creation complete")
+    return store_statblock(stats_dict)
+
+# create statblock based on info from user input
+@router.get("/statblock", response_model=List[dict])
+def list_statblocks():
+    """Returns a list of all statblocks, showing only essential information for the list view."""
+    
+    # Only fetch fields needed for the display list
+    projection = {"name": 1, "ac": 1, "hp": 1, "size": 1, "creature_type": 1}
+    blocks = list(collection.find({}, projection))
+    
+    # Convert MongoDB ObjectId to string for JSON serialization
+    for block in blocks:
+        block['_id'] = str(block['_id'])
+        
+    return blocks
+
+@router.get("/statblock/{statblock_id}")
+def get_statblock(statblock_id: str):
+    """Retrieves a single, full statblock by its MongoDB ID."""
+    
+    # Attempt to find the document by its ObjectId
+    block = collection.find_one({"_id": ObjectId(statblock_id)})
+    
+    if block:
+        block['_id'] = str(block['_id'])
+        return block
+        
+    # Standard 404 response
+    return {"error": "Statblock not found"}
 
 
 # test case   
