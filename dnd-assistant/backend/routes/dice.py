@@ -1,4 +1,3 @@
-"""Barbie: I modified it to better fit our requirements, but same logic"""
 from fastapi import APIRouter
 from pydantic import BaseModel, Field 
 import random

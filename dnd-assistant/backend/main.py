@@ -1,7 +1,14 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import HTMLResponse
 from pymongo import MongoClient
 import os
+
+from .routes import dice
+# Importing routes
+ #notes, audio, statblock
+
 
 app = FastAPI()
 
@@ -18,17 +25,21 @@ app.add_middleware(
 client = MongoClient('mongodb://localhost:27017/')
 db = client['dnd_assistant']
 
-# Importing routes
-from routes import audio, dice, notes, statblocks 
-#name your backend files as so, referred to as endpoint, so .e.g. emelia's dice.py is the dice endpoint
-
-app.include_router(audio.router, prefix="/api/audio")
+# app.include_router(audio.router, prefix="/api/audio")
 app.include_router(dice.router, prefix="/api/dice")
-app.include_router(notes.router, prefix="/api/notes")
-app.include_router(statblocks.router, prefix="/api/statblocks")
+# app.include_router(notes.router, prefix="/api/notes")
+# app.include_router(statblock.router, prefix="/api/statblocks")
 
-@app.get("/")
-def root():
-    return {"message": "D&D Assistant API"}
+app.mount("/css", StaticFiles(directory="frontend/css"), name="css")
+app.mount("/js", StaticFiles(directory="frontend/js"), name="js")
+app.mount("/img", StaticFiles(directory="frontend/img"), name="img")
+
+
+# Override the default root route to serve index.html
+@app.get("/", response_class=HTMLResponse)
+async def serve_frontend():
+    with open("frontend/index.html", "r") as f:
+        html_content = f.read()
+    return HTMLResponse(content=html_content, status_code=200)
 
 # Run with: cd backend, followed by uvicorn main:app --reload
