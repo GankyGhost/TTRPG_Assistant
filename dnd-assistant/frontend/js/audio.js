@@ -1,5 +1,3 @@
-const API_URL = 'http://localhost:8000/api';
-
 // Open menu modal
 function openAudioMenu() {
     document.getElementById('audio-menu-modal').style.display = 'block';
@@ -41,10 +39,10 @@ async function showAudioList() {
         const container = document.getElementById('audio-list-container');
         container.innerHTML = '';
         
-        if (statblocks.length === 0) {
-            container.innerHTML = '<p style="text-align: center; padding: 20px;">No stat blocks saved yet. Create one!</p>';
+        if (audio_files.length === 0) {
+            container.innerHTML = '<p style="text-align: center; padding: 20px;">No audio files saved yet. Create one!</p>';
         } else {
-            statblocks.forEach(sb => {
+            audio_files.forEach(sb => {
                 const item = document.createElement('div');
                 item.className = 'audio-list-item';
                 item.innerHTML = `
