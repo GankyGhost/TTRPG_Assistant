@@ -1,18 +1,20 @@
 # imports fastapi and pymongo
 from fastapi import APIRouter
 import pymongo
+import base64
 
 router = APIRouter()
 client = pymongo.MongoClient("mongodb+srv://mrnagrat_db_user:blueFUHSHUHd00d@dndatabase.hduyis6.mongodb.net/""?retryWrites=true&w=majority&tls=true")
 db = client["dndatabase"]
 collection = db["statblocks"]
 
-@router.post("/statblock")
-def create_statblock(statblock: dict):
+# helper function that stores the statblock dictionary into MongoDB
+def store_statblock(statblock: dict):
     result = collection.insert_one(statblock)
     return {"inserted_id": str(result.inserted_id)}
 
-@app.get("/modifier")
+
+# helper function that returns the modifier for any given score between 1-30
 def ability_modifier(score) -> int:
    
     if not isinstance(score, int):
@@ -23,7 +25,57 @@ def ability_modifier(score) -> int:
     return ((score - 10) // 2)
 
 
+# helper function to determine proficient skill bonuses
+def determine_bonus(skill:str, abilities:dict):
+    # a dictionary with keys named after each ability with a list containing the respective skills
+    skills_by_ability = {
+    "STR": ["Athletics"],
+    "DEX": ["Acrobatics", "Sleight of Hand", "Stealth"],
+    "INT": ["Arcana", "History", "Investigation", "Nature", "Religion"],
+    "WIS": ["Animal Handling", "Insight", "Medicine", "Perception", "Survival"],
+    "CHA": ["Deception", "Intimidation", "Performance", "Persuasion"] }
+
+    # determines which ability is tied to the skill
+    used_ability = ''
+    for ability, skill_list in skills_by_ability.items():
+        if skill in skill_list:
+           used_ability = ability
     
+    return ability_modifier(abilities[used_ability])
+
+# helper function to encode imnage into base64
+def image_to_base64(path):
+    with open(path, "rb") as image_file:      # read image in binary mode
+        encoded_string = base64.b64encode(image_file.read())  # encode to base64
+        return encoded_string.decode("utf-8") 
+
+
+# create statblock based on info from user input
+@router.post("/statblock")
+def create_statblock(stats: dict) -> None:
+    # determines the proficency bonus based on creatures CR
+    pb_table = [2, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4,
+    5, 5, 5, 5, 6, 6, 6, 6, 7, 7, 7, 7, 8, 8, 8, 8, 9, 9] # this list is size 31 for each CR level that is possible i.e CR0-4 makes PB = 2
+
+    stats['pb'] = pb_table[stats['cr']]
+
+    # properly formats the strings containing the skills
+    new_skills = [] # empty list that will hold the formatted skills that will replace the orignal skills element
+    for skill in stats['skills']:
+        bns = determine_bonus(skill, stats['abilities'])
+        new_skills.append(f"{skill} +{bns + stats['pb']}")
+    
+    stats['skills'] = new_skills # replacing the orignal skills with new_skills
+
+    # inputs base64 image
+    stats['image'] = image_to_base64(stats['image_path'])
+
+    store_statblock(stats)
+
+    print("Statblock creation complete")
+
+
+# test case   
 """""if __name__ == "__main__":
 
     data = {
