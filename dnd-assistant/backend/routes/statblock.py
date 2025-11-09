@@ -50,6 +50,13 @@ def image_to_base64(path):
         return encoded_string.decode("utf-8") 
 
 
+# helper function to decode image from base64
+def base64_to_image(b64_string, output_path):   # read binary
+    img_data = base64.b64decode(b64_string)  # decode from base64
+    with open(output_path, "wb") as f:
+        f.write(img_data)
+    
+    
 # create statblock based on info from user input
 @router.post("/statblock")
 def create_statblock(stats: dict) -> None:
