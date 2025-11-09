@@ -1,16 +1,13 @@
 import pymongo
 import base64
+from fastapi import APIRouter
+
+router = APIRouter()
 
 dnd_client = pymongo.MongoClient("mongodb+srv://mrnagrat_db_user:blueFUHSHUHd00d@dndatabase.hduyis6.mongodb.net/?appName=dndatabase")
 
 
-# for d in dnd_client.list_databases():
-#     print(d)
-
 dnd_database = dnd_client["dndatabase"]
-
-# for d in dnd_database.list_collections():
-#     print(d)
 
 audio_buttons = dnd_database["audio"]
 
@@ -26,6 +23,10 @@ def retrieve_mp3(q_name):
     free = audio_previews.find_one({"name": q_name})
     with open("dnd-assistant/sounds/"+q_name+".mp3", "wb") as f:
         f.write(free["file"])
+
+@router.get("/audio")
+def get_buttons():
+    return audio_buttons.find()
 
 
 # free = audio_previews.find_one({"name": "Ipa_MeowVoice_25_C5.wav"})

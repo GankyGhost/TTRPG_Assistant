@@ -14,7 +14,7 @@ client = freesound.FreesoundClient()
 client.set_token("eKPAn2CykoHlEAJH7XZgE66fUinbP70Ns4Nn5yE3","token")
 
 def search(word):
-    candidates = client.text_search(query=word, page_size="3", fields="id,name,previews,url")
+    candidates = client.text_search(query=word, page_size="10", fields="id,name,previews,url")
     return candidates
 
 def prev_up(snd):
@@ -54,6 +54,8 @@ def delete_preview(snd):
 
 def delete_button(snd):
     db.audio_buttons.delete_one({"name": snd.name})
+
+
 
 router = APIRouter()
 
@@ -103,11 +105,12 @@ def main():
         
         print(sound.name)
         print(sound.previews)
+        button_up(sound)
         
-        prev_up(sound)
-        play_preview(sound.name)
+        # prev_up(sound)
+        # play_preview(sound.name)
 
-        delete_preview(sound)
+        # delete_preview(sound)
         
         # save_audio_button(sound.name, sound.url)
 
