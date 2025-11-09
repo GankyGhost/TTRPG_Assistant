@@ -50,6 +50,7 @@ def play_preview(snd_name):
 
 def delete_preview(snd):
     db.audio_previews.delete_one({"name": snd.name})
+    os.remove("dnd-assistant/sounds/"+snd.name+".mp3")
 
 def delete_button(snd):
     db.audio_buttons.delete_one({"name": snd.name})
