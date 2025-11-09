@@ -22,15 +22,17 @@ def upload_preview(fill_dict):
 def upload_button(fill_dict):
     audio_buttons.insert_one(fill_dict)
 
-def play_preview(query_dict):
-    container = audio_previews.find({}, query_dict)
-    for x in container:
-        print(x)
+def retrieve_mp3(q_name):
+    free = audio_previews.find_one({"name": q_name})
+    with open("dnd-assistant/sounds/"+q_name+".mp3", "wb") as f:
+        f.write(free["file"])
 
 
-free = audio_previews.find_one({"name": "Ipa_MeowVoice_25_C5.wav"})
+# free = audio_previews.find_one({"name": "Ipa_MeowVoice_25_C5.wav"})
+# with open(free["name"]+".mp3", "wb") as f:
+#     f.write(free["file"])
 # print(free["file"])
-print(free["file"].decode('utf-8'))
+# print(free["file"].decode('utf-8'))
 # print(free["file"])
 # for e in free:
 #     print(e)
